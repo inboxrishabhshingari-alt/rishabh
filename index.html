@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Valentine</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      background-image: url("couple.jpg");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-color: #000;
+      z-index: 0;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 1;
+    }
+
+    .player {
+      position: fixed;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .box {
+      position: relative;
+      z-index: 2;
+      width: 90%;
+      max-width: 420px;
+      background: rgba(255,255,255,0.88);
+      color: #000;
+      padding: 22px;
+      border-radius: 14px;
+      text-align: center;
+    }
+
+    .box.dark {
+      background: rgba(28,15,20,0.78);
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 18px;
+      min-height: 60px;
+    }
+
+    .timer {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 14px;
+    }
+
+    button {
+      padding: 12px 26px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 6px;
+    }
+
+    #yes {
+      background: #ff4d6d;
+      color: #fff;
+    }
+
+    #no {
+      background: #444;
+      color: #fff;
+      position: fixed;
+      left: 50%;
+      top: 65%;
+      transform: translateX(-50%);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #result {
+      margin-top: 90px;
+      animation: slideDown 0.6s ease forwards;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .heart {
+      position: fixed;
+      top: -30px;
+      font-size: 22px;
+      color: #ff4d6d;
+      animation: fall linear forwards;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(120vh);
+        opacity: 0;
+      }
+    }
+
+    .whatsapp {
+      background: #25D366;
+      color: #fff;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg"></div>
+  <div class="overlay"></div>
+
+  <div id="player" class="player"></div>
+
+  <div class="box" id="question">
+    <h1>Vaishali, will you be my Valentine?</h1>
+
+    <div class="timer" id="timer">Thinking time left 00:05</div>
+
+    <p id="tease">
+      No dabane ka option hai.  
+      Pakadne ka nahi.
+    </p>
+
+    <button id="yes">Yes</button>
+    <button id="no">No</button>
+  </div>
+
+  <div class="box dark hidden" id="result">
+    <h1>Bas bas ❤️</h1>
+    <p>
+      Ab officially Valentine ho tum.  
+      Coffee location tum decide karogi.
+    </p>
+    <button class="whatsapp" onclick="openWhatsApp()">Message me</button>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <script>
+    let player
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player("player", {
+        videoId: "fCjSeWd2vVM",
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          loop: 1,
+          playlist: "fCjSeWd2vVM",
+          controls: 0
+        },
+        events: {
+          onReady: e => e.target.playVideo()
+        }
+      })
+    }
+
+    const noBtn = document.getElementById("no")
+    const yesBtn = document.getElementById("yes")
+    const question = document.getElementById("question")
+    const result = document.getElementById("result")
+    const teaseText = document.getElementById("tease")
+    const timer = document.getElementById("timer")
+
+    const lines = [
+      "Arre arre. Itna aasan nahi.",
+      "Phir se try karo.",
+      "Lagta hai haan hi likha hai.",
+      "Bas maan jao.",
+      "Thak jaogi. Haan bol do."
+    ]
+
+    let tries = 0
+
+    function resetTimer() {
+      let t = 5
+      timer.innerText = "Thinking time left 00:0" + t
+      clearInterval(window.t)
+      window.t = setInterval(() => {
+        t--
+        timer.innerText = "Thinking time left 00:0" + t
+        if (t === 0) resetTimer()
+      }, 1000)
+    }
+
+    resetTimer()
+
+    function moveNo() {
+      const rect = noBtn.getBoundingClientRect()
+      const x = Math.random() * (window.innerWidth - rect.width - 20)
+      const y = Math.random() * (window.innerHeight - rect.height - 20)
+      noBtn.style.left = x + "px"
+      noBtn.style.top = y + "px"
+      teaseText.innerText = lines[tries % lines.length]
+      tries++
+      resetTimer()
+    }
+
+    noBtn.addEventListener("mouseenter", moveNo)
+    noBtn.addEventListener("click", moveNo)
+
+    yesBtn.addEventListener("click", () => {
+      question.classList.add("hidden")
+      result.classList.remove("hidden")
+      player.unMute()
+      player.playVideo()
+      startHearts()
+    })
+
+    function startHearts() {
+      setInterval(() => {
+        const heart = document.createElement("div")
+        heart.className = "heart"
+        heart.innerText = "❤️"
+        heart.style.left = Math.random() * 100 + "vw"
+        heart.style.animationDuration = (2 + Math.random() * 3) + "s"
+        document.body.appendChild(heart)
+        setTimeout(() => heart.remove(), 5000)
+      }, 350)
+    }
+
+    function openWhatsApp() {
+      const text = encodeURIComponent(
+        "Haan bol diya. Coffee location main choose karungi ☕❤️"
+      )
+      window.open("https://wa.me/?text=" + text, "_blank")
+    }
+  </script>
+
+</body>
+</html>
